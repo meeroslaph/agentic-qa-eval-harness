@@ -69,6 +69,41 @@ describe("trajectoryEvaluator", () => {
     const r = evaluateTrajectory(sampleCase, { ...run, trace: reordered });
     expect(r.passed).toBe(false);
   });
+
+  it("passes when a metadata predicate matches the actual event", () => {
+    const caseWithMeta: GoldenCase = {
+      ...sampleCase,
+      expectedTrajectory: [
+        "intake.started",
+        { name: "routing.completed", metadata: { proposedRoute: "auto_approve" } },
+        "workflow.completed",
+      ],
+    };
+    const run = makeRun();
+    const traceWithMeta = run.trace.map((e) =>
+      e.name === "routing.completed" ? { ...e, metadata: { proposedRoute: "auto_approve" } } : e,
+    );
+    const r = evaluateTrajectory(caseWithMeta, { ...run, trace: traceWithMeta });
+    expect(r.passed).toBe(true);
+  });
+
+  it("fails when a metadata predicate does not match (right event, wrong path)", () => {
+    const caseWithMeta: GoldenCase = {
+      ...sampleCase,
+      expectedTrajectory: [
+        { name: "routing.completed", metadata: { proposedRoute: "compliance_review" } },
+      ],
+    };
+    const run = makeRun();
+    const traceWithMeta = run.trace.map((e) =>
+      e.name === "routing.completed" ? { ...e, metadata: { proposedRoute: "manager_review" } } : e,
+    );
+    const r = evaluateTrajectory(caseWithMeta, { ...run, trace: traceWithMeta });
+    expect(r.passed).toBe(false);
+    expect(r.missing).toEqual([
+      { name: "routing.completed", metadata: { proposedRoute: "compliance_review" } },
+    ]);
+  });
 });
 
 describe("consistencyEvaluator", () => {

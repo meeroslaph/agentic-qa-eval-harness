@@ -1,5 +1,5 @@
 import type { Decision, Invoice, Route } from "../domain/invoice.js";
-import type { TraceEventName } from "../workflow/trace.js";
+import type { TrajectoryStep } from "./trajectoryEvaluator.js";
 
 export type RiskTag =
   | "boundary"
@@ -16,15 +16,17 @@ export type GoldenCase = {
   expectedDecision: Decision;
   expectedRoute: Route;
   /**
-   * Trajectory expectation: required event names that must appear *in order*.
-   * Other events may appear between them.
+   * Trajectory expectation: required steps that must appear *in order*. A step
+   * can be a bare event name, or `{ name, metadata }` to additionally assert
+   * on the event's metadata (intermediate-state checks the outcome evaluator
+   * alone can't catch).
    */
-  expectedTrajectory: readonly TraceEventName[];
+  expectedTrajectory: readonly TrajectoryStep[];
   riskTags: readonly RiskTag[];
   notes?: string;
 };
 
-const BASE_TRAJECTORY: readonly TraceEventName[] = [
+const BASE_TRAJECTORY: readonly TrajectoryStep[] = [
   "intake.started",
   "intake.completed",
   "routing.started",
@@ -114,7 +116,18 @@ export const GOLDEN_CASES: readonly GoldenCase[] = [
     }),
     expectedDecision: "ESCALATE_COMPLIANCE",
     expectedRoute: "compliance_review",
-    expectedTrajectory: BASE_TRAJECTORY,
+    // Metadata assertion: the router itself must propose compliance_review.
+    // Catches a router that misranks priority (e.g. picks manager_review for
+    // the high amount) even when the reviewer later corrects the decision.
+    expectedTrajectory: [
+      "intake.started",
+      "intake.completed",
+      "routing.started",
+      { name: "routing.completed", metadata: { proposedRoute: "compliance_review" } },
+      "review.started",
+      "review.completed",
+      "workflow.completed",
+    ],
     riskTags: ["compliance", "high_value"],
   },
   {
@@ -128,7 +141,20 @@ export const GOLDEN_CASES: readonly GoldenCase[] = [
     }),
     expectedDecision: "REJECT",
     expectedRoute: "reject",
-    expectedTrajectory: BASE_TRAJECTORY,
+    // Metadata assertion: the missing_vat_id rule must actually trigger.
+    // Catches a rule pipeline that silently stops triggering (the outcome
+    // could still be REJECT via a different rule firing — wrong path,
+    // right answer).
+    expectedTrajectory: [
+      "intake.started",
+      "intake.completed",
+      "routing.started",
+      "routing.completed",
+      "review.started",
+      { name: "business_rule.checked", metadata: { rule: "missing_vat_id", triggered: true } },
+      "review.completed",
+      "workflow.completed",
+    ],
     riskTags: ["negative", "high_value"],
   },
   {

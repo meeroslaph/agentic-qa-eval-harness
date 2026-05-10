@@ -12,7 +12,7 @@
 | Metric | Value |
 |---|---|
 | outcome_pass_rate | 84.00% |
-| trajectory_pass_rate | 100.00% |
+| trajectory_pass_rate | 98.00% |
 | consistency_rate | 30.00% |
 | escalation_precision | 0.7778 |
 | escalation_recall | 0.9333 |
@@ -38,7 +38,7 @@
 | `gc-003-high-risk-vendor-compliance` | compliance | ESCALATE_COMPLIANCE | 5/5 | 5/5 | yes | ESCALATE_COMPLIANCE×5 |
 | `gc-004-missing-vat-reject` | negative | REJECT | 4/5 | 5/5 | **no** | REJECT×4, APPROVE×1 |
 | `gc-005-duplicate-reject` | negative | REJECT | 4/5 | 5/5 | **no** | REJECT×4, ESCALATE_MANAGER×1 |
-| `gc-006-high-amount-and-high-risk` | compliance, high_value | ESCALATE_COMPLIANCE | 4/5 | 5/5 | **no** | ESCALATE_COMPLIANCE×4, ESCALATE_MANAGER×1 |
+| `gc-006-high-amount-and-high-risk` | compliance, high_value | ESCALATE_COMPLIANCE | 4/5 | 4/5 | **no** | ESCALATE_COMPLIANCE×4, ESCALATE_MANAGER×1 |
 | `gc-007-high-amount-missing-vat-reject` | negative, high_value | REJECT | 5/5 | 5/5 | yes | REJECT×5 |
 | `gc-008-duplicate-and-high-risk-reject` | negative, compliance | REJECT | 4/5 | 5/5 | **no** | REJECT×4, ESCALATE_MANAGER×1 |
 | `gc-009-boundary-exactly-10000-approve` | boundary | APPROVE | 5/5 | 5/5 | yes | APPROVE×5 |
@@ -85,6 +85,10 @@
 **Failed outcomes**:
 
 - attempt 4: expected `ESCALATE_COMPLIANCE` got `ESCALATE_MANAGER` (route: `manager_review`)
+
+**Trajectory issues**:
+
+- attempt 2: missing events [{"name":"routing.completed","metadata":{"proposedRoute":"compliance_review"}}]
 
 ### `gc-008-duplicate-and-high-risk-reject` — Duplicate + high-risk → reject wins over compliance.
 
