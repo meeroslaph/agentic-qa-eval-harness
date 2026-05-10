@@ -5,7 +5,8 @@
 **Model client**: `FlakyMockModelClient`  
 **Runs per case**: 5  
 **Total cases**: 10  
-**Total runs**: 50
+**Total runs**: 50  
+**Seed**: 42 · **failureRate**: 0.25
 
 ## Summary
 
@@ -112,4 +113,12 @@
 - All costs/latencies are simulated; no real provider is called.
 - `consistency_rate` is the most informative signal for non-deterministic agents:
   it answers _"if I re-run this same input, does the agent agree with itself?"_
-- Trajectory check enforces required event names appearing in order.
+- The trajectory check enforces required events in order, and supports
+  metadata predicates per step (e.g. `routing.completed.proposedRoute`)
+  to catch right-answer-wrong-path regressions.
+- A gap between `outcome_pass_rate` and `trajectory_pass_rate` is
+  a signal worth reading: trajectory failures with passing outcomes
+  are *right answer reached via a broken intermediate step* — latent
+  regressions the outcome evaluator alone would not surface.
+- The seed/failureRate above pin the report — same values produce
+  identical numbers run over run.

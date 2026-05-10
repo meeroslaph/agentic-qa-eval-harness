@@ -47,6 +47,9 @@ async function main(): Promise<void> {
     model,
     mode: args.mode,
     runsPerCase: args.runs,
+    ...(args.mode === "flaky"
+      ? { flakyConfig: { seed: args.seed, failureRate: args.failureRate } }
+      : {}),
   });
 
   const md = renderMarkdownReport(report);

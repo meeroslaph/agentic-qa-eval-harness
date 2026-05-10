@@ -9,13 +9,23 @@ export function renderMarkdownReport(report: SuiteReport): string {
 
   lines.push(GENERATED_HEADER, "");
   lines.push(`# Eval Report — ${titleCase(report.mode)} mode`, "");
-  lines.push(
-    `**Model client**: \`${report.modelName}\`  `,
-    `**Runs per case**: ${report.runsPerCase}  `,
-    `**Total cases**: ${summary.totalCases}  `,
+  const headerLines = [
+    `**Model client**: \`${report.modelName}\``,
+    `**Runs per case**: ${report.runsPerCase}`,
+    `**Total cases**: ${summary.totalCases}`,
     `**Total runs**: ${summary.totalRuns}`,
-    "",
-  );
+  ];
+  if (report.flakyConfig) {
+    headerLines.push(
+      `**Seed**: ${report.flakyConfig.seed} · **failureRate**: ${report.flakyConfig.failureRate}`,
+    );
+  }
+  // Markdown hard line break on every line except the last so the header
+  // renders as separate lines.
+  for (let i = 0; i < headerLines.length; i++) {
+    lines.push(i < headerLines.length - 1 ? `${headerLines[i]}  ` : headerLines[i]!);
+  }
+  lines.push("");
 
   lines.push("## Summary", "");
   lines.push("| Metric | Value |", "|---|---|");
@@ -69,9 +79,21 @@ export function renderMarkdownReport(report: SuiteReport): string {
     "- All costs/latencies are simulated; no real provider is called.",
     "- `consistency_rate` is the most informative signal for non-deterministic agents:",
     "  it answers _\"if I re-run this same input, does the agent agree with itself?\"_",
-    "- Trajectory check enforces required event names appearing in order.",
-    "",
+    "- The trajectory check enforces required events in order, and supports",
+    "  metadata predicates per step (e.g. `routing.completed.proposedRoute`)",
+    "  to catch right-answer-wrong-path regressions.",
   );
+  if (report.mode === "flaky") {
+    lines.push(
+      "- A gap between `outcome_pass_rate` and `trajectory_pass_rate` is",
+      "  a signal worth reading: trajectory failures with passing outcomes",
+      "  are *right answer reached via a broken intermediate step* — latent",
+      "  regressions the outcome evaluator alone would not surface.",
+      "- The seed/failureRate above pin the report — same values produce",
+      "  identical numbers run over run.",
+    );
+  }
+  lines.push("");
 
   return lines.join("\n");
 }

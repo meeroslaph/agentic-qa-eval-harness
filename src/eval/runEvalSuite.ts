@@ -15,10 +15,16 @@ export type CaseEvalReport = {
   consistency: ConsistencyResult;
 };
 
+export type FlakyConfig = {
+  seed: number;
+  failureRate: number;
+};
+
 export type SuiteReport = {
   modelName: string;
   mode: "deterministic" | "flaky";
   runsPerCase: number;
+  flakyConfig?: FlakyConfig;
   cases: readonly CaseEvalReport[];
   summary: {
     totalCases: number;
@@ -38,6 +44,7 @@ export type RunEvalOptions = {
   mode: "deterministic" | "flaky";
   runsPerCase?: number;
   cases?: readonly GoldenCase[];
+  flakyConfig?: FlakyConfig;
 };
 
 export async function runEvalSuite(opts: RunEvalOptions): Promise<SuiteReport> {
@@ -88,6 +95,7 @@ export async function runEvalSuite(opts: RunEvalOptions): Promise<SuiteReport> {
     modelName: opts.model.name,
     mode: opts.mode,
     runsPerCase,
+    ...(opts.flakyConfig ? { flakyConfig: opts.flakyConfig } : {}),
     cases: caseReports,
     summary: {
       totalCases: cases.length,

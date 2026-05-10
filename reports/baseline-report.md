@@ -53,4 +53,6 @@ _None — clean run._
 - All costs/latencies are simulated; no real provider is called.
 - `consistency_rate` is the most informative signal for non-deterministic agents:
   it answers _"if I re-run this same input, does the agent agree with itself?"_
-- Trajectory check enforces required event names appearing in order.
+- The trajectory check enforces required events in order, and supports
+  metadata predicates per step (e.g. `routing.completed.proposedRoute`)
+  to catch right-answer-wrong-path regressions.
