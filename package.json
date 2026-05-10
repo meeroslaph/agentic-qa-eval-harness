@@ -1,0 +1,27 @@
+{
+  "name": "agentic-qa-eval-harness",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A minimal TypeScript PoC showing how to build a QA/evaluation harness around an agentic workflow (toy invoice approval).",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "eval": "tsx src/index.ts --mode=deterministic --runs=5 --out=reports/baseline-report.md",
+    "eval:flaky": "tsx src/index.ts --mode=flaky --runs=5 --out=reports/flaky-report.md"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.4",
+    "vitest": "^2.1.0"
+  }
+}
