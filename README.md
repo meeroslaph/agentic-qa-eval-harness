@@ -197,7 +197,7 @@ particular agent runtime.
   track business signals like deflection rate, time-to-decision, and
   reviewer-hours saved alongside the technical metrics.
 
-## Demo talking points
+## Design principles
 
 - **Quality is a property of the system, not just the agent.** Tools, prompts,
   routing, retries, and rule layers all affect outcomes; evaluate the whole.
