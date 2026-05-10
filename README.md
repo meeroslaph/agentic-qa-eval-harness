@@ -70,7 +70,7 @@ flowchart LR
 
 ### Layout
 
-```
+```text
 src/
   domain/                 # Invoice types + business rules (single source of truth)
   workflow/               # ModelClient + mocks + workflow runner + trace
