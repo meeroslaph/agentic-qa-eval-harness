@@ -15,26 +15,34 @@ single pass/fail runs, and it needs to evaluate both **outcomes** and the
 
 ## What this repo demonstrates
 
-- A clean **model/provider abstraction** (`ModelClient`) so the harness is
-  not coupled to any specific provider.
-- **Mock / replay** model layer so tests are reproducible, free, and
-  CI-friendly. No paid APIs are called.
-- A small **golden dataset** with explicit expected decisions, routes,
-  trajectories, and risk tags.
-- **Outcome** evaluation — does the final decision match expectation?
-- **Trajectory** evaluation — did the workflow visit the required steps in
-  order?
-- **Repeated-run consistency** evaluation — does the agent agree with itself
-  across N runs of the same input?
-- **Cost / latency** simulation — first-class, even though the values are
-  fake, because real production gates use them.
-- **Escalation precision / recall** — agent behavior expressed as a binary
-  classifier.
-- **Traceability** — every workflow step emits a structured trace event.
-- **Modular markdown agent instructions** — versioned product knowledge that
-  could later be fed to real agents as prompts or tool instructions.
+Grouped by the concern each piece serves, not by feature:
+
+- **Evaluation surface.** Five evaluators that each answer a different
+  question: outcome (did we get the right decision?), trajectory (did we
+  get there the right way?), consistency (does the agent agree with itself
+  across N runs?), escalation as a binary classifier (precision/recall),
+  and cost/latency aggregated with p95.
+- **Determinism where it matters.** A `ModelClient` seam decouples the
+  workflow from any provider. Two mocks live behind it — a deterministic
+  baseline and a seeded flaky one — so the harness is reproducible while
+  the agent it evaluates is not.
+- **Traceability.** Every workflow step emits a structured event with
+  cost, latency, and metadata. Trajectory and cost evaluators reason over
+  that trace; the metadata can be asserted on directly.
+- **Production mapping.** A small golden dataset with risk tags, a
+  fail-closed edge case, and a markdown report whose schema would slot
+  into a CI quality gate or a dashboard without much change.
+- **Versioned agent knowledge.** Intake/routing/review policy lives as
+  plain markdown — capability modules that a real agent could later load
+  as prompts, tool descriptions, or retrieval documents, without coupling
+  the harness to any agent framework.
 
 ## Architecture
+
+The three workflow stages (intake → routing → review) sit on the left,
+share a `TraceRecorder`, and feed each run into the QA harness on the
+right. The model client is the seam where a real provider could replace
+the mock; the rest of the diagram is unchanged.
 
 ```mermaid
 flowchart LR
@@ -116,6 +124,8 @@ evaluator do the load-bearing work.
 
 ## How to run
 
+Requires Node 22+.
+
 ```bash
 npm install
 npm test                # vitest, all green
@@ -131,6 +141,9 @@ markdown report to `reports/`.
 
 ## Example report snippet
 
+Real numbers from the current [`reports/flaky-report.md`](reports/flaky-report.md)
+(seed 42, failureRate 0.25, 5 runs/case):
+
 ```markdown
 # Eval Report — Flaky mode
 
@@ -142,13 +155,18 @@ markdown report to `reports/`.
 ## Summary
 | Metric | Value |
 |---|---|
-| outcome_pass_rate | 78.00% |
-| trajectory_pass_rate | 100.00% |
-| consistency_rate | 40.00% |
-| escalation_precision | 0.83 |
-| escalation_recall | 0.78 |
-| unstable_cases | `gc-001-low-risk-approve`, `gc-006-high-amount-and-high-risk` |
+| outcome_pass_rate     | 84.00% |
+| trajectory_pass_rate  | 98.00% |
+| consistency_rate      | 30.00% |
+| escalation_precision  | 0.7778 |
+| escalation_recall     | 0.9333 |
+| unstable_cases        | 7 of 10 |
 ```
+
+The 98% trajectory pass rate (vs 84% outcome) is the metadata-aware
+trajectory check earning its keep: on `gc-006` one attempt's *router*
+proposed the wrong route even though the reviewer corrected the final
+decision — a wrong-path-right-answer the outcome evaluator alone misses.
 
 ## Agent instruction modules
 
@@ -161,23 +179,23 @@ particular agent runtime.
 
 ## How this would evolve in production
 
-- **Real model adapters** alongside the mock: OpenAI, Anthropic, Ollama, an
-  internal gateway.
-- **Production traces become regression cases** — every novel decision the
-  live agent makes can be replayed offline.
-- A **human-labeled calibration set** to anchor LLM-as-judge confidence.
-- **LLM-as-judge** *only* for subjective cases (e.g. justification quality);
-  deterministic checks first.
-- **CI quality gates**: fail the build if `outcome_pass_rate` or
-  `consistency_rate` regress beyond a threshold.
-- **Dashboarding**: track the same metrics as time series, not just per-PR.
-- **Versioning** of prompts, tool definitions, model snapshots, and these
-  instruction files — bind them to commit SHAs in the trace.
-- **Privacy / security**: redact PII before traces leave the environment;
-  keep a deny-list of prompt content the harness must never log.
-- **ROI metrics**: deflection rate, time-to-decision, reviewer-hours saved.
-- **Browser checks** with Playwright if the agent interacts with a UI —
-  golden flows of the actual user journey.
+- **Real model adapters** alongside the mock — same `ModelClient`
+  interface, no other code changes — pointed at OpenAI, Anthropic, an
+  on-prem Ollama, or an internal gateway.
+- **Production traces become regression cases.** Every novel decision the
+  live agent makes is a replayable input for the next eval run.
+- **LLM-as-judge for subjective slices only** (e.g. justification quality),
+  anchored against a small human-labeled calibration set. Deterministic
+  checks first; model judges where no rule fits.
+- **CI quality gates** that fail the build when `outcome_pass_rate` or
+  `consistency_rate` regress past a threshold — the markdown report's
+  schema already supports this.
+- **Versioning** of prompts, tool definitions, model snapshots, and the
+  instruction modules — bind each to a commit SHA in the trace so a
+  regression can be traced to the exact stack that produced it.
+- **Privacy and ROI.** Redact PII before traces leave the environment;
+  track business signals like deflection rate, time-to-decision, and
+  reviewer-hours saved alongside the technical metrics.
 
 ## Demo talking points
 
@@ -196,11 +214,9 @@ particular agent runtime.
 
 ## A note about `AGENTS.md` and `CLAUDE.md`
 
-The repo includes `AGENTS.md` and `CLAUDE.md` to document how AI coding
-agents should work with this codebase — coding standards, testing
-expectations, and what *not* to add. They are included to demonstrate
-disciplined AI-augmented development, not because they are the focus of the
-PoC. The focus remains the QA / evaluation harness.
+`AGENTS.md` documents how AI coding agents should work on this repo
+(commands, constraints, what *not* to add). `CLAUDE.md` is a pointer to
+it. They are guardrails, not the focus of the PoC.
 
 ## License
 
