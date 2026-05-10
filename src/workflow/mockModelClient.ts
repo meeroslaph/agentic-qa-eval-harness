@@ -66,6 +66,18 @@ export type FlakyOptions = {
   failureRate?: number;
   /** Seed root — combined with caseId + attempt to keep runs reproducible. */
   seed?: number;
+  /**
+   * Per-case seed overrides. When set for a caseId, that case uses this seed
+   * instead of the global one. Useful for pinning a specific instability
+   * pattern as a regression test, independent of the global seed.
+   */
+  caseSeeds?: Readonly<Record<string, number>>;
+  /**
+   * Per-case failure-rate overrides. Use 1 to force a case to always flake
+   * (hard-fail regression) or 0 to keep one case clean while others flake.
+   * Falls back to the global failureRate when not set.
+   */
+  caseFailureRates?: Readonly<Record<string, number>>;
 };
 
 /**
@@ -78,10 +90,14 @@ export class FlakyMockModelClient implements ModelClient {
   readonly name = "FlakyMockModelClient";
   private readonly failureRate: number;
   private readonly seed: number;
+  private readonly caseSeeds: Readonly<Record<string, number>>;
+  private readonly caseFailureRates: Readonly<Record<string, number>>;
 
   constructor(opts: FlakyOptions = {}) {
     this.failureRate = opts.failureRate ?? 0.25;
     this.seed = opts.seed ?? 42;
+    this.caseSeeds = opts.caseSeeds ?? {};
+    this.caseFailureRates = opts.caseFailureRates ?? {};
   }
 
   async complete(request: ModelRequest): Promise<ModelResponse> {
@@ -89,12 +105,15 @@ export class FlakyMockModelClient implements ModelClient {
     const correctDecision = decideFromRules(evaluateRules(invoice));
     const correctRoute = routeForDecision(correctDecision);
 
+    const effectiveSeed = this.caseSeeds[request.caseId] ?? this.seed;
+    const effectiveRate = this.caseFailureRates[request.caseId] ?? this.failureRate;
+
     const rngSeed =
-      this.seed ^
+      effectiveSeed ^
       hashString(`${request.caseId}|${request.task}|${request.attempt}`);
     const rng = mulberry32(rngSeed);
 
-    const flake = rng() < this.failureRate;
+    const flake = rng() < effectiveRate;
 
     let route = correctRoute;
     let decision = correctDecision;
