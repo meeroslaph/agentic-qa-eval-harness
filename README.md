@@ -204,4 +204,4 @@ PoC. The focus remains the QA / evaluation harness.
 
 ## License
 
-MIT (or whatever the host org chooses).
+Released under the MIT License — see [LICENSE](LICENSE).
