@@ -5,7 +5,7 @@
   "description": "A minimal TypeScript PoC showing how to build a QA/evaluation harness around an agentic workflow (toy invoice approval).",
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -19,7 +19,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/node": "^20.14.0",
+    "@types/node": "^22.0.0",
     "tsx": "^4.19.0",
     "typescript": "^5.5.4",
     "vitest": "^2.1.0"
