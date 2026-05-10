@@ -82,19 +82,37 @@ reports/                  # Generated markdown reports (committed as samples)
 
 ## Why is the LLM mocked?
 
-A QA harness that depends on a non-deterministic external service cannot give
-reliable signals. The mock layer makes the harness:
+The system under test is non-deterministic by nature: a real agent calling
+a real LLM will produce different traces, costs, and sometimes different
+decisions across runs of the same input. **That non-determinism is the
+thing the harness exists to evaluate** — via repeated runs, consistency
+checks, and trajectory evaluation.
 
-- **Reproducible** — same inputs produce the same outputs (or, for the flaky
-  mock, the same *distribution* of outputs given a seed).
+But for the harness to give *reliable* signals about that non-determinism,
+the **harness itself** must be reproducible. If the eval pipeline flakes
+for the same reason the agent does, you can't distinguish a real
+regression from infrastructural noise.
+
+So we mock the only non-deterministic dependency — the LLM. The mock
+layer makes the harness:
+
+- **Reproducible** — same inputs produce the same outputs (or, for the
+  flaky mock, the same *distribution* of outputs given a seed).
 - **CI-friendly** — no API keys, no rate limits, no flakes.
 - **Free** — no per-run cost.
-- **Testable** — we can validate the harness itself before pointing it at a
-  real model.
+- **Testable** — we can validate the harness itself before pointing it
+  at a real model.
 
-A real adapter (`OpenAIModelClient`, `AnthropicModelClient`, `OllamaModelClient`,
-`InternalModelClient`) implements the same `ModelClient` interface and slots
-in unchanged.
+`FlakyMockModelClient` then **simulates** agent non-determinism in a
+controlled way — given a seed, the same flake pattern every time — so
+the consistency evaluator has something realistic to catch without the
+harness becoming flaky itself.
+
+A real adapter (`OpenAIModelClient`, `AnthropicModelClient`,
+`OllamaModelClient`, `InternalModelClient`) implements the same
+`ModelClient` interface and slots in unchanged. In that mode, the SUT's
+non-determinism is real, and the harness's repeated runs + consistency
+evaluator do the load-bearing work.
 
 ## How to run
 
