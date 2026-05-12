@@ -1,8 +1,26 @@
 # agentic-qa-eval-harness
 
+[![CI](https://github.com/meeroslaph/agentic-qa-eval-harness/actions/workflows/ci.yml/badge.svg)](https://github.com/meeroslaph/agentic-qa-eval-harness/actions/workflows/ci.yml)
+
 A small TypeScript proof-of-concept showing **how to build a QA / evaluation
 harness around an agentic workflow**. The toy domain is invoice approval; the
 harness is the point.
+
+## TL;DR
+
+Regular software gives the same answer every time. AI agents don't — and
+that's the problem this repo addresses. A traditional test asks *"did it
+pass?"*; the right question for an AI is *"how often does it pass, and
+would it give the same answer next time?"*
+
+This repo runs a toy AI agent through 10 cases, **five times each**, and
+grades it on five dimensions including whether it agrees with itself
+across runs. The AI is mocked so the harness is reproducible.
+
+**The thing to look at:** [`reports/flaky-report.md`](reports/flaky-report.md)
+shows 84% correct decisions but only **30% self-agreement**. That gap —
+mostly right but rarely *reliably* right — is the kind of bug only
+multi-run testing catches.
 
 ## Problem
 
