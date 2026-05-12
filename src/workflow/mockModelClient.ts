@@ -28,9 +28,9 @@ export class DeterministicMockModelClient implements ModelClient {
 }
 
 /**
- * Tiny seeded PRNG — sfc32 truncated to one 32-bit lane via mulberry32.
- * Deterministic per (seed, caseId, attempt) so test runs are reproducible
- * while still simulating non-deterministic agent behavior.
+ * Tiny seeded pseudo-random number generator (mulberry32 by Tommy Ettinger).
+ * The math doesn't matter for the harness — only the property does:
+ * same seed → same number sequence, reproducibly.
  */
 function mulberry32(seed: number): () => number {
   let a = seed >>> 0;
