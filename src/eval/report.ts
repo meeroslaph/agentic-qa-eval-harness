@@ -89,6 +89,11 @@ export function renderMarkdownReport(report: SuiteReport): string {
       "  a signal worth reading: trajectory failures with passing outcomes",
       "  are *right answer reached via a broken intermediate step* — latent",
       "  regressions the outcome evaluator alone would not surface.",
+      "- `failed_cases` vs `unstable_cases` measure different things even",
+      "  when they overlap: failed = \"got it wrong at least once\" (correctness),",
+      "  unstable = \"answers disagreed across runs\" (reliability). They diverge",
+      "  when an agent is *consistently wrong* — failed but stable — a different",
+      "  bug class (regression to fix vs flake to investigate).",
       "- The seed/failureRate above pin the report — same values produce",
       "  identical numbers run over run.",
     );
