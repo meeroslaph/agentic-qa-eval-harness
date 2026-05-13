@@ -14,20 +14,13 @@
 | outcome_pass_rate | 100.00% |
 | trajectory_pass_rate | 100.00% |
 | consistency_rate | 100.00% |
-| escalation_precision | 1.0000 |
-| escalation_recall | 1.0000 |
+| escalation_accuracy | 1.0000 |
 | average_simulated_cost | 0.004 |
 | total_simulated_cost | 0.2 |
 | average_simulated_latency_ms | 100 |
 | p95_simulated_latency_ms | 100 |
 | failed_cases | — |
 | unstable_cases | — |
-
-## Escalation classification
-
-| TP | FP | TN | FN | Total |
-|---|---|---|---|---|
-| 15 | 0 | 35 | 0 | 50 |
 
 ## Per-case results
 

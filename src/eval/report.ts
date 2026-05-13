@@ -32,21 +32,13 @@ export function renderMarkdownReport(report: SuiteReport): string {
   lines.push(`| outcome_pass_rate | ${pct(summary.outcomePassRate)} |`);
   lines.push(`| trajectory_pass_rate | ${pct(summary.trajectoryPassRate)} |`);
   lines.push(`| consistency_rate | ${pct(summary.consistencyRate)} |`);
-  lines.push(`| escalation_precision | ${summary.escalation.precision.toFixed(4)} |`);
-  lines.push(`| escalation_recall | ${summary.escalation.recall.toFixed(4)} |`);
+  lines.push(`| escalation_accuracy | ${summary.escalation.accuracy.toFixed(4)} |`);
   lines.push(`| average_simulated_cost | ${summary.costLatency.averageCostUnits} |`);
   lines.push(`| total_simulated_cost | ${summary.costLatency.totalCostUnits} |`);
   lines.push(`| average_simulated_latency_ms | ${summary.costLatency.averageLatencyMs} |`);
   lines.push(`| p95_simulated_latency_ms | ${summary.costLatency.p95LatencyMs} |`);
   lines.push(`| failed_cases | ${listOrDash(summary.failedCases)} |`);
   lines.push(`| unstable_cases | ${listOrDash(summary.unstableCases)} |`);
-  lines.push("");
-
-  lines.push("## Escalation classification", "");
-  lines.push("| TP | FP | TN | FN | Total |", "|---|---|---|---|---|");
-  lines.push(
-    `| ${summary.escalation.truePositive} | ${summary.escalation.falsePositive} | ${summary.escalation.trueNegative} | ${summary.escalation.falseNegative} | ${summary.escalation.total} |`,
-  );
   lines.push("");
 
   lines.push("## Per-case results", "");

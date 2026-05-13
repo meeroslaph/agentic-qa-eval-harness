@@ -15,20 +15,13 @@
 | outcome_pass_rate | 84.00% |
 | trajectory_pass_rate | 98.00% |
 | consistency_rate | 30.00% |
-| escalation_precision | 0.7778 |
-| escalation_recall | 0.9333 |
+| escalation_accuracy | 0.9000 |
 | average_simulated_cost | 0.004 |
 | total_simulated_cost | 0.2 |
 | average_simulated_latency_ms | 127.98 |
 | p95_simulated_latency_ms | 150 |
 | failed_cases | `gc-001-low-risk-approve`, `gc-002-high-amount-manager`, `gc-004-missing-vat-reject`, `gc-005-duplicate-reject`, `gc-006-high-amount-and-high-risk`, `gc-008-duplicate-and-high-risk-reject`, `gc-010-malformed-reject` |
 | unstable_cases | `gc-001-low-risk-approve`, `gc-002-high-amount-manager`, `gc-004-missing-vat-reject`, `gc-005-duplicate-reject`, `gc-006-high-amount-and-high-risk`, `gc-008-duplicate-and-high-risk-reject`, `gc-010-malformed-reject` |
-
-## Escalation classification
-
-| TP | FP | TN | FN | Total |
-|---|---|---|---|---|
-| 14 | 4 | 31 | 1 | 50 |
 
 ## Per-case results
 

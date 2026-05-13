@@ -136,22 +136,19 @@ describe("costEvaluator", () => {
 });
 
 describe("escalationEvaluator", () => {
-  it("computes precision and recall correctly", () => {
+  it("computes accuracy across (case x run) pairs", () => {
     const escCase = GOLDEN_CASES.find((c) => c.id === "gc-002-high-amount-manager")!;
     const approveCase: GoldenCase = sampleCase;
     const pairs = [
-      { goldenCase: escCase, run: makeRun({ decision: "ESCALATE_MANAGER", route: "manager_review" }) },
-      { goldenCase: escCase, run: makeRun({ decision: "APPROVE", route: "auto_approve" }) }, // FN
-      { goldenCase: approveCase, run: makeRun({ decision: "APPROVE", route: "auto_approve" }) }, // TN
-      { goldenCase: approveCase, run: makeRun({ decision: "ESCALATE_MANAGER", route: "manager_review" }) }, // FP
+      { goldenCase: escCase, run: makeRun({ decision: "ESCALATE_MANAGER", route: "manager_review" }) }, // correct (escalate-expected, escalated)
+      { goldenCase: escCase, run: makeRun({ decision: "APPROVE", route: "auto_approve" }) }, // wrong (should have escalated)
+      { goldenCase: approveCase, run: makeRun({ decision: "APPROVE", route: "auto_approve" }) }, // correct (no escalation needed, no escalation given)
+      { goldenCase: approveCase, run: makeRun({ decision: "ESCALATE_MANAGER", route: "manager_review" }) }, // wrong (escalated unnecessarily)
     ];
     const m = evaluateEscalations(pairs);
-    expect(m.truePositive).toBe(1);
-    expect(m.falseNegative).toBe(1);
-    expect(m.trueNegative).toBe(1);
-    expect(m.falsePositive).toBe(1);
-    expect(m.precision).toBeCloseTo(0.5, 4);
-    expect(m.recall).toBeCloseTo(0.5, 4);
+    expect(m.total).toBe(4);
+    expect(m.correct).toBe(2);
+    expect(m.accuracy).toBeCloseTo(0.5, 4);
   });
 });
 

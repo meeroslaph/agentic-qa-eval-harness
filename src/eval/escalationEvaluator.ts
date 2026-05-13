@@ -3,48 +3,37 @@ import type { WorkflowResult } from "../workflow/runWorkflow.js";
 import type { GoldenCase } from "./goldenCases.js";
 
 export type EscalationMetrics = {
-  truePositive: number;
-  falsePositive: number;
-  trueNegative: number;
-  falseNegative: number;
-  precision: number;
-  recall: number;
   total: number;
+  correct: number;
+  accuracy: number;
 };
 
 /**
- * Treat escalation as a binary classification: did the agent escalate, and
- * should it have? Computed across (case × repeat) so a flaky agent that
- * escalates 3/5 times for an escalation case still contributes 3 TP + 2 FN.
+ * "Did the agent's escalate/not-escalate call match what the case expected?"
+ * Computed across (case × repeat) so a flaky agent that escalates 3/5 times
+ * for an escalation case contributes 3 correct + 2 wrong, not a single
+ * average.
+ *
+ * Kept deliberately as a single accuracy number rather than precision/recall —
+ * the latter is the right tool when you need to distinguish "bothered humans
+ * for nothing" from "let risky cases through," which is an operational
+ * concern that lives upstream of this PoC.
  */
 export function evaluateEscalations(
   pairs: ReadonlyArray<{ goldenCase: GoldenCase; run: WorkflowResult }>,
 ): EscalationMetrics {
-  let tp = 0,
-    fp = 0,
-    tn = 0,
-    fn = 0;
-
+  let correct = 0;
   for (const { goldenCase, run } of pairs) {
     const expectedEsc = ESCALATION_DECISIONS.has(goldenCase.expectedDecision);
     const actualEsc = ESCALATION_DECISIONS.has(run.decision);
-    if (expectedEsc && actualEsc) tp++;
-    else if (!expectedEsc && actualEsc) fp++;
-    else if (!expectedEsc && !actualEsc) tn++;
-    else fn++;
+    if (expectedEsc === actualEsc) correct++;
   }
 
-  const precision = tp + fp === 0 ? 1 : tp / (tp + fp);
-  const recall = tp + fn === 0 ? 1 : tp / (tp + fn);
-
+  const total = pairs.length;
   return {
-    truePositive: tp,
-    falsePositive: fp,
-    trueNegative: tn,
-    falseNegative: fn,
-    precision: round(precision, 4),
-    recall: round(recall, 4),
-    total: tp + fp + tn + fn,
+    total,
+    correct,
+    accuracy: total === 0 ? 1 : round(correct / total, 4),
   };
 }
 

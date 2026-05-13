@@ -73,9 +73,7 @@ function printConsoleSummary(
   console.log(`outcome_pass_rate     : ${(s.outcomePassRate * 100).toFixed(2)}%`);
   console.log(`trajectory_pass_rate  : ${(s.trajectoryPassRate * 100).toFixed(2)}%`);
   console.log(`consistency_rate      : ${(s.consistencyRate * 100).toFixed(2)}%`);
-  console.log(
-    `escalation precision/recall: ${s.escalation.precision.toFixed(4)} / ${s.escalation.recall.toFixed(4)}`,
-  );
+  console.log(`escalation_accuracy   : ${(s.escalation.accuracy * 100).toFixed(2)}%`);
   console.log(
     `avg cost units / p95 latency ms: ${s.costLatency.averageCostUnits} / ${s.costLatency.p95LatencyMs}`,
   );
