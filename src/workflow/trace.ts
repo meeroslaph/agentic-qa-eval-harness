@@ -22,7 +22,7 @@ export type TraceEvent = {
  * see costEvaluator for the constants.
  */
 export class TraceRecorder {
-  private events: TraceEvent[] = [];
+  private readonly events: TraceEvent[] = [];
   private clock: number;
 
   constructor(startTs = 0) {
