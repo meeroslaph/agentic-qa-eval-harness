@@ -38,8 +38,8 @@ Grouped by the concern each piece serves, not by feature:
 - **Evaluation surface.** Five evaluators that each answer a different
   question: outcome (did we get the right decision?), trajectory (did we
   get there the right way?), consistency (does the agent agree with itself
-  across N runs?), escalation as a binary classifier (precision/recall),
-  and cost/latency aggregated with p95.
+  across N runs?), escalation accuracy (when it bothered a human, was that
+  the right call?), and cost/latency aggregated with p95.
 - **Determinism where it matters.** A `ModelClient` seam decouples the
   workflow from any provider. Two mocks live behind it — a deterministic
   baseline and a seeded flaky one — so the harness is reproducible while
@@ -176,8 +176,7 @@ Real numbers from the current [`reports/flaky-report.md`](reports/flaky-report.m
 | outcome_pass_rate     | 84.00% |
 | trajectory_pass_rate  | 98.00% |
 | consistency_rate      | 30.00% |
-| escalation_precision  | 0.7778 |
-| escalation_recall     | 0.9333 |
+| escalation_accuracy   | 0.9000 |
 | unstable_cases        | 7 of 10 |
 ```
 
