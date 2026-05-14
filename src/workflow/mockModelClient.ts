@@ -29,8 +29,8 @@ export class DeterministicMockModelClient implements ModelClient {
 
 /**
  * Tiny seeded pseudo-random number generator (mulberry32 by Tommy Ettinger).
- * The math doesn't matter for the harness — only the property does:
- * same seed → same number sequence, reproducibly.
+ * Only one property matters here: the same seed yields the same number
+ * sequence every time.
  */
 function mulberry32(seed: number): () => number {
   let a = seed >>> 0;
@@ -64,15 +64,15 @@ const ALL_DECISIONS: Decision[] = [
 export type FlakyOptions = {
   /** Probability per call that the mock returns a wrong route/decision. */
   failureRate?: number;
-  /** Seed root — combined with caseId + attempt to keep runs reproducible. */
+  /** Seed root, combined with caseId and attempt to keep runs reproducible. */
   seed?: number;
 };
 
 /**
  * Simulates a non-deterministic agent. Most calls are correct; occasionally
- * (per failureRate) the model returns a different route/decision. The choice
+ * (per failureRate) the model returns a different route or decision. The choice
  * is fully reproducible given (seed, caseId, attempt), so flaky-mode reports
- * are stable enough to commit.
+ * stay stable enough to commit.
  */
 export class FlakyMockModelClient implements ModelClient {
   readonly name = "FlakyMockModelClient";

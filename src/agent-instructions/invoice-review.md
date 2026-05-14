@@ -1,4 +1,4 @@
-# Invoice review — capability instructions
+# Invoice review: capability instructions
 
 > Module version: `0.1.0`
 > Owner: invoice domain
@@ -20,7 +20,7 @@ Each rule is checked and emitted as a `business_rule.checked` trace event so
 QA can verify the trajectory, not only the outcome.
 
 | Rule | Triggers when |
-|---|---|
+| --- | --- |
 | `duplicate_invoice` | `isDuplicate == true` |
 | `missing_vat_id` | `vatId == null` or empty |
 | `malformed_invoice` | intake flagged structural issues |
@@ -29,7 +29,7 @@ QA can verify the trajectory, not only the outcome.
 
 ## Decision priority
 
-Same as routing — reject > compliance > manager > approve. See
+Same as routing: reject > compliance > manager > approve. See
 [invoice-routing.md](invoice-routing.md).
 
 ## Edge case: malformed/ambiguous invoices → REJECT

@@ -10,9 +10,9 @@ export type ConsistencyResult = {
 };
 
 /**
- * The marquee evaluator. Repeats per case are mandatory because non-deterministic
- * agents can pass once and fail twice on the same input — single-shot pass/fail
- * is not a meaningful signal.
+ * Repeats per case are mandatory: a non-deterministic agent can pass once and
+ * fail twice on the same input, so a single-shot pass/fail is not a meaningful
+ * signal. This evaluator reports whether all runs agreed on one decision.
  */
 export function evaluateConsistency(
   caseId: string,

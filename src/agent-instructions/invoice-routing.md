@@ -1,4 +1,4 @@
-# Invoice routing — capability instructions
+# Invoice routing: capability instructions
 
 > Module version: `0.1.0`
 > Owner: invoice domain
@@ -7,22 +7,22 @@
 ## Purpose
 
 Pick the route an invoice should follow. The router classifies, it does not
-finalize the decision — the reviewer agent has the last word and can override
+finalize the decision. The reviewer agent has the last word and can override
 based on business rules.
 
 ## Routes
 
-- `auto_approve` — clean, low-risk, under or equal to threshold
-- `manager_review` — high amount with no other blocking issues
-- `compliance_review` — high-risk vendor or other compliance signal
-- `reject` — duplicate, missing VAT, or malformed
+- `auto_approve`: clean, low-risk, under or equal to threshold
+- `manager_review`: high amount with no other blocking issues
+- `compliance_review`: high-risk vendor or other compliance signal
+- `reject`: duplicate, missing VAT, or malformed
 
 ## Priority (highest first)
 
-1. **Reject** — `isDuplicate` OR `vatId == null` OR `malformed`
-2. **Compliance** — `isHighRiskVendor`
-3. **Manager** — `amount > 10_000`
-4. **Auto-approve** — otherwise
+1. Reject: `isDuplicate` OR `vatId == null` OR `malformed`
+2. Compliance: `isHighRiskVendor`
+3. Manager: `amount > 10_000`
+4. Auto-approve: otherwise
 
 ## Rationale
 

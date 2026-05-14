@@ -5,9 +5,9 @@ this repo.
 
 ## Project purpose
 
-This is a **proof-of-concept for a QA / evaluation harness around an agentic
-workflow**. The toy domain is invoice approval. The harness is the point —
-the agent itself is intentionally minimal and mocked.
+This is a proof-of-concept for a QA and evaluation harness around an agentic
+workflow. The toy domain is invoice approval. The harness is the point; the
+agent itself is intentionally minimal and mocked.
 
 When in doubt, optimize for clarity over cleverness.
 
@@ -33,7 +33,7 @@ The two reports are committed as samples and should remain stable run-over-run.
   comments to explain it, simplify the function.
 - Use `zod` only at trust boundaries (e.g. validating an external invoice
   payload). Don't use it for internal types we control.
-- Comments only where intent is non-obvious — *why*, not *what*.
+- Comments only where intent is non-obvious: why, not what.
 
 ## Testing expectations
 
@@ -44,7 +44,7 @@ The two reports are committed as samples and should remain stable run-over-run.
   an instability test (high failure rate → multiple decisions seen).
 - Integration test runs `runEvalSuite` end-to-end in both modes.
 
-## Constraints — what NOT to add
+## Constraints: what NOT to add
 
 - **No real paid LLM API calls.** Anthropic, OpenAI, etc. The repo must run
   in CI with no secrets.
@@ -52,9 +52,9 @@ The two reports are committed as samples and should remain stable run-over-run.
   show first-principles design.
 - **No SaaS tracing**, no database, no server, no UI.
 - **No Claude Skills**, no proprietary agent runtime.
-- Don't introduce dependencies casually. Every new dep should pull weight.
-- Don't expand the toy domain. The simplicity comes from the
-  fact that the whole codebase fits in one head.
+- Don't introduce dependencies casually. Every new dependency should earn its place.
+- Don't expand the toy domain. The simplicity comes from the whole codebase
+  fitting in one head.
 
 ## Preserve the core message
 

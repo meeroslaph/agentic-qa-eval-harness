@@ -3,10 +3,10 @@ import type { GoldenCase } from "./goldenCases.js";
 import type { WorkflowResult } from "../workflow/runWorkflow.js";
 
 /**
- * A trajectory step is either a bare event name (the original loose check)
- * or `{ name, metadata }` where each declared metadata key must equal the
- * corresponding key on the actual event. This lets goldens assert on
- * intermediate state — e.g. "the router proposed compliance_review" — that
+ * A trajectory step is either a bare event name (the loose check) or
+ * `{ name, metadata }`, where each declared metadata key must equal the
+ * corresponding key on the actual event. This lets golden cases assert on
+ * intermediate state, such as "the router proposed compliance_review," that
  * the outcome evaluator alone cannot catch (right answer, wrong path).
  */
 export type TrajectoryStep =
@@ -22,8 +22,9 @@ export type TrajectoryResult = {
 };
 
 /**
- * "Required steps appear in order" with optional metadata partial-match.
- * Tolerant of extra events (e.g. multiple `business_rule.checked` emissions).
+ * Checks that required steps appear in order, with an optional metadata
+ * partial-match. Tolerant of extra events (e.g. multiple
+ * `business_rule.checked` emissions).
  */
 export function evaluateTrajectory(c: GoldenCase, run: WorkflowResult): TrajectoryResult {
   const events = run.trace;

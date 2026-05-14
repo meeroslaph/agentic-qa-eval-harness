@@ -1,4 +1,4 @@
-# Invoice intake — capability instructions
+# Invoice intake: capability instructions
 
 > Module version: `0.1.0`
 > Owner: invoice domain
@@ -8,13 +8,13 @@
 
 Convert a raw invoice payload into a normalized `Invoice` record and flag any
 fields that are missing, ambiguous, or structurally malformed. The intake
-step does **not** make approval decisions — it produces clean inputs for
-routing and review.
+step does not make approval decisions; it produces clean inputs for routing
+and review.
 
 ## Required output fields
 
 | Field | Notes |
-|---|---|
+| --- | --- |
 | `invoiceId` | string, non-empty |
 | `vendorId` | string, non-empty |
 | `vendorName` | string |

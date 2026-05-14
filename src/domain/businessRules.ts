@@ -41,10 +41,10 @@ export function evaluateRules(invoice: Invoice): RuleCheck[] {
 
 /**
  * Decision priority (highest first):
- *   1. REJECT  — duplicate / missing VAT / malformed
- *   2. ESCALATE_COMPLIANCE — high-risk vendor
- *   3. ESCALATE_MANAGER — amount strictly > threshold
- *   4. APPROVE — everything else (including amount == threshold)
+ *   1. REJECT: duplicate, missing VAT, or malformed
+ *   2. ESCALATE_COMPLIANCE: high-risk vendor
+ *   3. ESCALATE_MANAGER: amount strictly above threshold
+ *   4. APPROVE: everything else (including amount == threshold)
  */
 export function decideFromRules(checks: readonly RuleCheck[]): Decision {
   const triggered = new Set(checks.filter((c) => c.triggered).map((c) => c.rule));

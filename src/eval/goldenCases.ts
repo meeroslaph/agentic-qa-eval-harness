@@ -16,10 +16,10 @@ export type GoldenCase = {
   expectedDecision: Decision;
   expectedRoute: Route;
   /**
-   * Trajectory expectation: required steps that must appear *in order*. A step
-   * can be a bare event name, or `{ name, metadata }` to additionally assert
-   * on the event's metadata (intermediate-state checks the outcome evaluator
-   * alone can't catch).
+   * Trajectory expectation: required steps that must appear in order. A step
+   * can be a bare event name, or `{ name, metadata }` to also assert on the
+   * event's metadata (intermediate-state checks the outcome evaluator alone
+   * cannot catch).
    */
   expectedTrajectory: readonly TrajectoryStep[];
   riskTags: readonly RiskTag[];
@@ -143,7 +143,7 @@ export const GOLDEN_CASES: readonly GoldenCase[] = [
     expectedRoute: "reject",
     // Metadata assertion: the missing_vat_id rule must actually trigger.
     // Catches a rule pipeline that silently stops triggering (the outcome
-    // could still be REJECT via a different rule firing — wrong path,
+    // could still be REJECT via a different rule firing: wrong path,
     // right answer).
     expectedTrajectory: [
       "intake.started",

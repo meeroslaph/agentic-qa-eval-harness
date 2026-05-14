@@ -5,10 +5,7 @@ const GENERATED_HEADER =
 
 export function renderMarkdownReport(report: SuiteReport): string {
   const { summary } = report;
-  const lines: string[] = [];
 
-  lines.push(GENERATED_HEADER, "");
-  lines.push(`# Eval Report — ${titleCase(report.mode)} mode`, "");
   const headerLines = [
     `**Model client**: \`${report.modelName}\``,
     `**Runs per case**: ${report.runsPerCase}`,
@@ -22,34 +19,39 @@ export function renderMarkdownReport(report: SuiteReport): string {
   }
   // Markdown hard line break on every line except the last so the header
   // renders as separate lines.
-  for (let i = 0; i < headerLines.length; i++) {
-    lines.push(i < headerLines.length - 1 ? `${headerLines[i]}  ` : headerLines[i]!);
-  }
-  lines.push("");
-
-  lines.push("## Summary", "");
-  lines.push("| Metric | Value |", "|---|---|");
-  lines.push(`| outcome_pass_rate | ${pct(summary.outcomePassRate)} |`);
-  lines.push(`| trajectory_pass_rate | ${pct(summary.trajectoryPassRate)} |`);
-  lines.push(`| consistency_rate | ${pct(summary.consistencyRate)} |`);
-  lines.push(`| escalation_accuracy | ${summary.escalation.accuracy.toFixed(4)} |`);
-  lines.push(`| average_simulated_cost | ${summary.costLatency.averageCostUnits} |`);
-  lines.push(`| total_simulated_cost | ${summary.costLatency.totalCostUnits} |`);
-  lines.push(`| average_simulated_latency_ms | ${summary.costLatency.averageLatencyMs} |`);
-  lines.push(`| p95_simulated_latency_ms | ${summary.costLatency.p95LatencyMs} |`);
-  lines.push(`| failed_cases | ${listOrDash(summary.failedCases)} |`);
-  lines.push(`| unstable_cases | ${listOrDash(summary.unstableCases)} |`);
-  lines.push("");
-
-  lines.push("## Per-case results", "");
-  lines.push(
-    "| Case | Risk tags | Expected decision | Outcome pass rate | Trajectory pass rate | Consistent | Decisions seen |",
-    "|---|---|---|---|---|---|---|",
+  const header = headerLines.map((line, i) =>
+    i < headerLines.length - 1 ? `${line}  ` : line,
   );
-  for (const c of report.cases) {
-    lines.push(renderCaseRow(c));
-  }
-  lines.push("");
+
+  const lines: string[] = [
+    GENERATED_HEADER,
+    "",
+    `# Eval Report: ${titleCase(report.mode)} mode`,
+    "",
+    ...header,
+    "",
+    "## Summary",
+    "",
+    "| Metric | Value |",
+    "| --- | --- |",
+    `| outcome_pass_rate | ${pct(summary.outcomePassRate)} |`,
+    `| trajectory_pass_rate | ${pct(summary.trajectoryPassRate)} |`,
+    `| consistency_rate | ${pct(summary.consistencyRate)} |`,
+    `| escalation_accuracy | ${summary.escalation.accuracy.toFixed(4)} |`,
+    `| average_simulated_cost | ${summary.costLatency.averageCostUnits} |`,
+    `| total_simulated_cost | ${summary.costLatency.totalCostUnits} |`,
+    `| average_simulated_latency_ms | ${summary.costLatency.averageLatencyMs} |`,
+    `| p95_simulated_latency_ms | ${summary.costLatency.p95LatencyMs} |`,
+    `| failed_cases | ${listOrDash(summary.failedCases)} |`,
+    `| unstable_cases | ${listOrDash(summary.unstableCases)} |`,
+    "",
+    "## Per-case results",
+    "",
+    "| Case | Risk tags | Expected decision | Outcome pass rate | Trajectory pass rate | Consistent | Decisions seen |",
+    "| --- | --- | --- | --- | --- | --- | --- |",
+    ...report.cases.map(renderCaseRow),
+    "",
+  ];
 
   const interesting = report.cases.filter(
     (c) =>
@@ -57,40 +59,40 @@ export function renderMarkdownReport(report: SuiteReport): string {
       c.outcomes.some((o) => !o.passed) ||
       c.trajectories.some((t) => !t.passed),
   );
-  if (interesting.length > 0) {
-    lines.push("## Failures and instability", "");
-    for (const c of interesting) {
-      lines.push(renderCaseDetail(c));
-    }
-  } else {
-    lines.push("## Failures and instability", "", "_None — clean run._", "");
-  }
-
-  lines.push("## Notes", "");
   lines.push(
-    "- All costs/latencies are simulated; no real provider is called.",
-    "- `consistency_rate` is the most informative signal for non-deterministic agents:",
-    "  it answers _\"if I re-run this same input, does the agent agree with itself?\"_",
-    "- The trajectory check enforces required events in order, and supports",
+    "## Failures and instability",
+    "",
+    ...(interesting.length > 0
+      ? interesting.map(renderCaseDetail)
+      : ["_None. Clean run._", ""]),
+  );
+
+  const notes = [
+    "## Notes",
+    "",
+    "- All costs and latencies are simulated; no real provider is called.",
+    "- `consistency_rate` is the most informative signal for non-deterministic",
+    "  agents: it answers whether re-running the same input gives the same answer.",
+    "- The trajectory check enforces required events in order and supports",
     "  metadata predicates per step (e.g. `routing.completed.proposedRoute`)",
     "  to catch right-answer-wrong-path regressions.",
-  );
+  ];
   if (report.mode === "flaky") {
-    lines.push(
-      "- A gap between `outcome_pass_rate` and `trajectory_pass_rate` is",
-      "  a signal worth reading: trajectory failures with passing outcomes",
-      "  are *right answer reached via a broken intermediate step* — latent",
-      "  regressions the outcome evaluator alone would not surface.",
-      "- `failed_cases` vs `unstable_cases` measure different things even",
-      "  when they overlap: failed = \"got it wrong at least once\" (correctness),",
-      "  unstable = \"answers disagreed across runs\" (reliability). They diverge",
-      "  when an agent is *consistently wrong* — failed but stable — a different",
-      "  bug class (regression to fix vs flake to investigate).",
-      "- The seed/failureRate above pin the report — same values produce",
+    notes.push(
+      "- A gap between `outcome_pass_rate` and `trajectory_pass_rate` is worth",
+      "  reading: trajectory failures with passing outcomes mean the right answer",
+      "  was reached through a broken intermediate step, a latent regression the",
+      "  outcome evaluator alone would not surface.",
+      "- `failed_cases` and `unstable_cases` measure different things even when",
+      "  they overlap. Failed means got it wrong at least once (correctness);",
+      "  unstable means answers disagreed across runs (reliability). They diverge",
+      "  when an agent is consistently wrong (failed but stable), a different bug",
+      "  class: a regression to fix rather than a flake to investigate.",
+      "- The seed and failureRate above pin the report: the same values produce",
       "  identical numbers run over run.",
     );
   }
-  lines.push("");
+  lines.push(...notes, "");
 
   return lines.join("\n");
 }
@@ -108,7 +110,7 @@ function renderCaseRow(c: CaseEvalReport): string {
 
 function renderCaseDetail(c: CaseEvalReport): string {
   const lines: string[] = [];
-  lines.push(`### \`${c.goldenCase.id}\` — ${c.goldenCase.description}`, "");
+  lines.push(`### \`${c.goldenCase.id}\`: ${c.goldenCase.description}`, "");
   if (!c.consistency.consistent) {
     lines.push(
       `**Inconsistent** across ${c.consistency.totalRuns} runs. Decisions seen: ${JSON.stringify(c.consistency.decisionCounts)}.`,
@@ -141,7 +143,7 @@ function pct(r: number): string {
 }
 
 function listOrDash(arr: readonly string[]): string {
-  return arr.length === 0 ? "—" : arr.map((s) => `\`${s}\``).join(", ");
+  return arr.length === 0 ? "none" : arr.map((s) => `\`${s}\``).join(", ");
 }
 
 function titleCase(s: string): string {

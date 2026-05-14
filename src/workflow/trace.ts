@@ -18,8 +18,8 @@ export type TraceEvent = {
 };
 
 /**
- * Simple in-memory trace recorder. Costs/latencies are simulated, not measured —
- * see costEvaluator for the constants.
+ * Simple in-memory trace recorder. Costs and latencies are simulated, not
+ * measured; see costEvaluator for the constants.
  */
 export class TraceRecorder {
   private readonly events: TraceEvent[] = [];
